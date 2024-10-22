@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter;
 import java.io.FileWriter;   
 import java.io.IOException; 
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 public class Prescription {
 
@@ -22,7 +23,7 @@ public class Prescription {
 
 
     // set constructor 
-    public Prescription(int prescID, String firstName, String lastName, String address, float sphere, float axis, float cylinder, Date examinationDate, String optometrist){
+    public Prescription(int prescID, String firstName, String lastName, String address, float sphere, float axis, float cylinder, String examinationDate, String optometrist){
         this.prescID = prescID;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -30,8 +31,34 @@ public class Prescription {
         this.sphere = sphere;
         this.axis = axis;
         this.cylinder = cylinder;
-        this.examinationDate = examinationDate;
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+        try {
+            // Parse the string to a Date object
+            Date date = sdf.parse(examinationDate);
+            
+            // Convert the Date object back to string
+            String formattedDate = sdf.format(date);
+            
+            // Check if the formatted date matches the original string
+            if(examinationDate.equals(formattedDate)){
+                this.examinationDate = date;
+            }
+            else{
+                System.out.println("Please input valid date");
+                this.examinationDate = null;
+            }
+        } 
+
+        catch (ParseException e) {
+            //if date does not match
+            System.out.println("Invalid date format");
+            this.examinationDate = null;
+            
+        }
+
+        
         this.optometrist = optometrist;
+        
         
         
 
@@ -45,19 +72,26 @@ public class Prescription {
                 if ((this.sphere >= -20.0) && (this.sphere <= 20.0 )){ //if value of sphere in parameters
                     if ((this.cylinder >= -4.0) && (this.cylinder <= 4.0 )){//if value of cylinder in parameters
                         if ((this.axis >= 0) && (this.axis <= 180)){//if value of axis in parameters
-                            //date format set
-                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy"); 
-                            sdf.setLenient(false);
-      
+                            //date format check
+
+                                    if (this.examinationDate != null){
+                                    
+
+                                    
                                 //if optometrist length in parameters
                                 if ((optometrist.length() >= 8) && (optometrist.length() <= 25)){
 
                                     try {
                                         //open the file, with filename
+                                        
                                         FileWriter myWriter = new FileWriter("presc.txt");
                                         //start writing into file
-                                        myWriter.write("Start");
-                                        myWriter.write(this.firstName + " " + this.lastName);
+                                        //change examination date to string to write into txt
+                                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+                                        String printableDate = sdf.format(examinationDate);
+                                        myWriter.write(printableDate + ": ");
+                                        myWriter.write(this.firstName + " " + this.lastName + " - ");
+                                        myWriter.write("Address: " + this.address + " Sphere: "+ this.sphere + " cylinder: " + this.cylinder +" axis: " + this.axis + " Optometrist: " + this.optometrist);
                                         //myWriter.write()
     
                                         myWriter.close(); // close the file
@@ -73,14 +107,12 @@ public class Prescription {
                                       //return true
                                     return true;
                                 }
-                                else{
-                                    System.out.println("Invalid optometrist");
-                                }
-
-                                
+                            }
+                            else{
+                                System.out.println("empty date");
+                            }
                             
-                    
-                        
+
                         }
                         else{
                             System.out.println("Invalid axis");
@@ -120,7 +152,7 @@ public class Prescription {
                             //open the file, with filename
                             FileWriter myWriter = new FileWriter("review.txt");
                             //start writing into file
-                            myWriter.write("Start");
+                      
                             myWriter.write(remarkType + ": " + remark);
                             //myWriter.write()
 
@@ -149,8 +181,9 @@ public class Prescription {
             }
     
         }
+        else{
         System.out.println("remark needs to be between 6 to 20 characters");
-
+        }
 
         return true;
     }
@@ -204,11 +237,10 @@ public class Prescription {
 
   public static void main(String[] args) {
     
-    Date mydate = new Date(12,12,2004); 
     
-    Prescription test = new Prescription(10,"first", "last", "AddressSss", 3, 120, 4, mydate, "nowkawdm");
+    Prescription test = new Prescription(10,"Kevin", "Smith", "Building 80 RMIT", 3, 120, 4, "24/12/24", "Halil Ali");
     test.addPrescription();
-    test.addRemark("This sucksss", "Client");
+    test.addRemark("This sucks so much", "Client");
   }
 
 }
